@@ -68,13 +68,18 @@ namespace App.Metrics.AspNetCore.Tracking.Middleware
             {
                 var elapsed = _metrics.Clock.Nanoseconds - startTime;
 
+
                 if (context.HasMetricsCurrentRouteName() && _ignoredHttpStatusCodes.All(i => i != context.Response.StatusCode))
                 {
+                    var tags = context.GetMetricsTags();
+
                     if (_useBucketTimer)
                     {
-                        _metrics.RecordEndpointsRequestTime(_bucketTimerOptions,
+                        _metrics.RecordEndpointsRequestTime(
+                            _bucketTimerOptions,
                             context.GetOAuthClientIdIfRequired(),
                             context.GetMetricsCurrentRouteName(),
+                            tags,
                             elapsed);
                     }
                     else
@@ -82,6 +87,7 @@ namespace App.Metrics.AspNetCore.Tracking.Middleware
                         _metrics.RecordEndpointsRequestTime(
                             context.GetOAuthClientIdIfRequired(),
                             context.GetMetricsCurrentRouteName(),
+                            tags,
                             elapsed);
                     }
                 }

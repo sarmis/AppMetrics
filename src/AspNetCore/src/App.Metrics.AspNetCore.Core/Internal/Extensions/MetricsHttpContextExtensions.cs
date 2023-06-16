@@ -3,6 +3,8 @@
 // </copyright>
 
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.AspNetCore.Http
@@ -11,6 +13,7 @@ namespace Microsoft.AspNetCore.Http
     public static class MetricsHttpContextExtensions
     {
         private static readonly string MetricsCurrentRouteName = "__App.Metrics.CurrentRouteName__";
+        private static readonly string MetricsTagPrefix = "__App.Metrics.TagPrefix__";
 
         public static void AddMetricsCurrentRouteName(this HttpContext context, string metricName)
         {
@@ -35,5 +38,11 @@ namespace Microsoft.AspNetCore.Http
         }
 
         public static bool HasMetricsCurrentRouteName(this HttpContext context) { return context.Items.ContainsKey(MetricsCurrentRouteName); }
+
+        public static (string name, string value)[] GetMetricsTags(this HttpContext context) =>        
+            context.Items
+                .Where(i => (i.Key as string).StartsWith(MetricsTagPrefix))
+                .Select(i => ((i.Key as string).Substring(MetricsTagPrefix.Length), i.Value as string)).ToArray();
+        
     }
 }
